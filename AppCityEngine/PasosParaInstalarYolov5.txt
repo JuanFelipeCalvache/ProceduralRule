@@ -1,0 +1,9 @@
+1- Clonar repositorio - git clone https://github.com/ultralytics/yolov5.git
+
+2- instalar numpy - pip install numpy
+
+3- instalar torch que es la que maneja el tema de la GPU se recomienda la siguiente - pip install torch==2.0.0+cu118 torchvision==0.15.1+cu118 torchaudio==2.0.0+cu118 --index-url https://download.pytorch.org/whl/cu118
+
+4- En cas de que pida ultralytics instalarla - pip install ultralytics
+
+5- Entrena el modelo con la siguiente linea de código recuerda establecer bien donde se encuentra el script .  - python train.py --img 640 --batch 16 --epochs 50 --data /path/to/your/puertasVentanas.yaml --cfg yolov5s.yaml --weights yolov5s.pt --name custom_yolov5

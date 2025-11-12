@@ -1,0 +1,33 @@
+version "2020.0"
+    brickMap = "assets/ladrillo.jpg"
+    attr width=20
+    attr height=50
+    attr depth=40
+    attr apartamentos = 5
+    attr pisos = 5
+
+    Lot-->
+    extrude(40)
+    s(width, height, depth)
+    center(xz)
+    comp(f) { side : Facade 
+                | top  :  Roof }	
+    
+    Facade-->
+    setupProjection(0, scope.xy, 5, 5)
+    texture(brickMap)
+    projectUV(0)
+    split(y) { { ~0.5 : X 
+                    | ~(height/pisos) - 0.5 : Floor }* 
+                    | ~ 0.5  : X }
+    
+    Roof-->
+    setupProjection(0, scope.xy, 5, 5)
+    texture(brickMap)
+    projectUV(0)
+    roofGable(20)
+    
+    Floor-->
+    split(x) { { 0.5 : X 
+                | ~(depth/apartamentos) - 0.5: Window }* 
+                | ~0.5   : X }

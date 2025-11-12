@@ -1,0 +1,231 @@
+version "2020.0"
+
+attr wall_texture = "assets/texture2.jpg"
+wall_texture2 = "assets/texture2.jpg"
+window_texture = "assets/windowWall.jpg"
+balcony_texture = "assets/windowTwo.jpg"
+attr window_obj = "assets/ventanaObj5.obj"
+white_texture = "assets/whitetexture.jpg"
+Roof_texture = "assets/tejas.jpg"
+middle_texture = "assets/blanco.jpg"
+door_obj = "assets/Door.fbx"
+
+
+    attr pisos = 8
+    attr height = 60
+    attr width = scope.sx
+    attr depth = scope.sz
+    attr roof = "no"
+    attr floor = 1
+    attr topledge = 1
+    attr floors = 7
+    attr widthWall = (width/floors) 
+    attr widthWallFirstFloor = (width/4)
+    attr heightwall = (height/pisos) - 1
+
+
+
+    Structure -->
+        extrude(height)  
+        building
+
+    building-->
+        comp(f){ front: FrontFacade
+                | left : LeftSide 
+                | right: RigthSide
+                | back: BackSide
+                | top: Roof }
+        
+LeftSide-->	
+	PinturaParedes
+	
+RigthSide-->
+	PinturaParedes
+	
+BackSide-->
+	PinturaParedes
+
+        
+    FrontFacade-->
+        split(y) { {floor : Floor(split.index) 
+                | ~heightwall : FloorWall(split.index)}*
+                | ~topledge: TopLedge(split.index)}
+        
+    TopLedge(topindex) -->
+
+        case topindex == 0:
+            extrude(0)
+        else:
+            extrude(0.2)
+        
+        PinturaParedesTop
+        
+    Floor(floorindex)-->
+        split(x){ {0.5: BottomColumn(split.index)
+                |~widthWall -1: Middle(split.index)}*
+				}
+		
+		
+	BottomColumn(ColInd)-->
+		extrude(0.2)
+		PinturaParedesTop
+	
+	Middle(middleInd)-->
+		extrude(0.2)
+		PinturaParedesTop
+				
+        
+        
+    FloorWall(floorwallindex)-->
+    	case floorwallindex == 1:
+    		split(x){ {1:sideColumn(split.index)
+	                |~width/3  : firstFloor(split.index) }*
+	                |1: final}
+    		
+    	else:
+    	
+	        split(x) { {~0.5:sideColumn(split.index)
+	                |widthWall -0.5 :WallColumn(split.index) }*
+	                |~0.5: final}
+	                
+	final -->
+		PinturaParedes
+                
+                
+ 	sideColumn(columnIndex)-->
+ 		case columnIndex == 0:
+ 			extrude(0)
+ 			PinturaParedes
+ 		else:
+ 			extrude(0)
+ 			PinturaParedes
+        
+    WallColumn(wallcolumnindex)-->
+        case wallcolumnindex == 0:
+            split(x){~widthWall: SideLeftFloor(split.index)
+                    |1: SidCenterFloor(split.index)
+                    |~widthWall: SideRightFloor(split.index)}
+                    
+
+
+        else:
+            split(x){~widthWall/2 - 2: SideLeftFloor(split.index)
+                    |widthWall: SideCenterFloor(split.index)
+                    |~widthWall/2 -2: SideRightFloor(split.index)}
+
+	firstFloor(firstIndx)-->
+		case firstIndx == 3:
+				split(x){~3: SideLeftFloor(split.index)
+                    |widthWallFirstFloor: SideCenterFirstFloor
+                    |~3: SideRightFloor(split.index)}
+                
+		else:
+			split(x){~widthWallFirstFloor/2 - 2: SideLeftFloor(split.index)
+                    |4: SideCenterFloorF(split.index)
+                    |~widthWallFirstFloor/2 -2: SideRightFloor(split.index)}
+                    
+	SideCenterFirstFloor-->
+		
+		Door                
+	
+	
+	
+    SideCenterFloor(sidecenter)-->
+  
+        split(y){~1.5 : top(split.index)
+                | 1.5 : middle(split.index)
+                |~1.5 : bottom(split.index)}
+                
+    SideCenterFloorF(sidecenter)-->
+  
+        split(y){~1.5 : top(split.index)
+                | 1.5 : middleF(split.index)
+                |~1.5 : bottom(split.index)}
+                
+
+	middleF(midind)-->
+		WindowFirstF
+
+    SideLeftFloor(sideleftfloor)-->
+        PinturaParedes
+        
+    SideRightFloor(sideleftfloor)-->
+    	PinturaParedes
+		
+    top(topside)-->
+        extrude(0)
+        PinturaParedes
+
+    middle(middleside)-->
+        Window
+        
+        
+    bottom(topside)-->
+        extrude(0)
+        PinturaParedes
+        
+
+        
+    PinturaParedes-->
+        setupProjection(0, scope.xy, 6 , 6)
+        texture(wall_texture)
+        projectUV(0)
+        
+	PinturaParedesTop-->
+        setupProjection(0, scope.xz, 6 , 6)
+        texture(wall_texture2)
+        projectUV(0)
+        
+    
+    WindowTexture-->
+        setupProjection(0, scope.xz, 5, 5)
+        texture(window_texture)
+        projectUV(0)
+        rotateUV(0, 180)
+        
+    TexturaBalcony-->
+        setupProjection(0, scope.xz, 5, 5)
+        texture(balcony_texture)
+        projectUV(0)
+        rotateUV(0, 180)	
+    
+        
+	TextureRoof-->
+		setupProjection(0, scope.xz, 10, 10)
+        texture(Roof_texture)
+        projectUV(0)
+        rotateUV(0, 180)
+    
+    Window -->
+        i(window_obj)
+        s(widthWall-0.5 , 1.5, 0.7)  // Escala la ventana al tama o deseado
+        t(0,0,0)
+        PinturaBlanca
+        
+    WindowFirstF -->
+        i(window_obj)
+        s(4 , 1.5, 0.7)  // Escala la ventana al tama o deseado
+        t(0,0,0)
+        PinturaBlanca
+    
+    Door -->
+        i(door_obj)
+        s(1  , heightwall, widthWallFirstFloor)  // Escala la ventana al tama o deseado
+        t(0,0,1)
+        r(0,90,0)
+        PinturaBlanca
+        
+    WindowBalcony -->
+        i(window_obj)
+        s('1, 'heightwall, 1)  // Escala la ventana al tama o deseado
+        t(0,-1,heightwall)
+        r(270, 0, 0)
+        PinturaBlanca
+        
+
+        
+    MiddleBalcony-->
+        setupProjection(0, scope.xz, 5, 5)
+        texture(middle_texture)
+        projectUV(0)
+        rotateUV(0, 180)

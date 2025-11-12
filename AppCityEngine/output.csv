@@ -1,0 +1,3 @@
+TipoEdificio,Altura,Ancho,Profundidad,TipoTecho
+industrial,100,20,50,Tejas
+residencial,50,30,30,no
