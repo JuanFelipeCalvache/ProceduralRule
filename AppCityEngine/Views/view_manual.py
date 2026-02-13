@@ -1,53 +1,23 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import messagebox
 import os
 from AppCityEngine.Component.generarRegla import GenerarCGA
-from AppCityEngine.Component.eventButtons import EventButtons
-import sys
-import os
+from AppCityEngine.Component.custom_components import TitleHeader, FileListBox, Footer, LabeledEntry
+from AppCityEngine.Views.base_view import BaseView
 
-def resourcePath(relativePath):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        basePath = sys._MEIPASS
-    except Exception:
-        basePath = os.path.abspath(".")
-
-    return os.path.join(basePath, relativePath)
-
-class ManualView(tk.Frame):
+class ManualView(BaseView):
     def __init__(self, master=None):
         super().__init__(master)
-        self.master = master
-        self.event_buttons = EventButtons(self)  # Pasamos la instancia de la vista a EventButtons
-        self.generated_files = []
         self.create_widgets()
 
     def create_widgets(self):
         self.view_manual = tk.Frame(self, bg="blue")
         self.view_manual.pack(fill="both", expand=True)
 
-        self.label = tk.Label(self, text="Vista para cargar datos manualmente", bg="blue", fg="white")
-        self.label.pack(side="bottom", pady=10)
-        
+        self.header = TitleHeader(self.view_manual)
+        self.header.pack(fill="x")
 
-        # Carga el logo
-        logo2_path = resourcePath("images/ambosLogos.png")
-        self.logo2 = tk.PhotoImage(file=logo2_path).subsample(4, 4)
-
-        # Crear un frame con estilo para el título
-        frame_style = ttk.Style()
-        frame_style.configure("RoundedFrame.TFrame", borderwidth=5, relief="raised", background="lightgrey", bordercolor="gold")
-        self.rounded_frame = ttk.Frame(self.view_manual, style="RoundedFrame.TFrame", relief="raised")
-        self.rounded_frame.pack(side="top", fill="both", padx=10, pady=(20, 40))
-
-        # Título con logo
-        self.labelTittle = tk.Label(self.rounded_frame, text="SISTEMA DE GENERACIÓN DE REGLAS AUTOMÁTICAS", image=self.logo2, compound=tk.LEFT, bg="snow", font=("Arial", 14, "bold"), relief="sunken", highlightbackground="#000080", highlightcolor="#000080", highlightthickness=2)
-        self.labelTittle.image = self.logo2
-        self.labelTittle.pack(fill="both", expand=True, padx=10, pady=10)
-
-        # Campos de entrada y etiquetas
+        # Campos de entrada
         self.create_input_fields()
 
         # Lista de archivos generados
@@ -57,127 +27,109 @@ class ManualView(tk.Frame):
         self.create_buttons()
 
     def create_input_fields(self):
-        # Tipo de edificio
-        self.labelTextBuilding = tk.Label(self.view_manual, text="Tipo de edificio", bg="blue", fg="white", font=("Arial", 16))
-        self.labelTextBuilding.pack()
-        self.labelTextBuilding.place(relx=0.08, rely=0.4, anchor="n")
-
+        # Grid System Constants
+        self.col1_x = 0.20
+        self.col2_x = 0.50
+        self.col3_x = 0.80
+        self.row1_y = 0.35
+        self.row2_y = 0.50
+        
+        # 1. Tipo de edificio
+        # For uniformity, we put the label above or beside? 
+        # Since other inputs use LabeledEntry (Side-by-side), let's try to mimic that or just place them nicely.
+        # We will place Label and OptionMenu manually but centered on Col 1
+        
+        # 1. Tipo de edificio
+        self.labelBuilding = tk.Label(self.view_manual, text="Tipo de\nedificio", bg="blue", fg="white", font=("Arial", 16), justify="right")
+        # Align Label and Dropdown
+        # Move dropdown slightly right to start strictly after the label column space if needed, 
+        # or keep centering around col1_x. 
+        # Since text is now narrower but taller, it fits better in the left space.
+        self.labelBuilding.place(relx=self.col1_x - 0.02, rely=self.row1_y, anchor="e") 
+        
         self.building_type_var = tk.StringVar()
         self.building_type_var.set("Elija una opción")
         self.dropdownBuilding = tk.OptionMenu(self.view_manual, self.building_type_var, "residencial", "comercial", "industrial", command=self.update_fields_based_on_building_type)
-        self.dropdownBuilding.pack()
-        self.dropdownBuilding.place(relx=0.22, rely=0.41, anchor="n")
+        self.dropdownBuilding.config(width=15)
+        self.dropdownBuilding.place(relx=self.col1_x + 0.02, rely=self.row1_y, anchor="w")
 
-        # Ancho
-        self.labelWidth = tk.Label(self.view_manual, text="Ancho", bg="blue", fg="white", font=("Arial", 16))
-        self.labelWidth.pack()
-        self.labelWidth.place(relx=0.41, rely=0.4, anchor="n")
+        # 2. Ancho (Col 2, Row 1)
+        self.entryWidth = LabeledEntry(self.view_manual, "Ancho", entry_width=15)
+        self.entryWidth.place(relx=self.col2_x, rely=self.row1_y, anchor="center")
 
-        self.frameTextWidth = tk.Entry(self.view_manual, width=20)
-        self.frameTextWidth.pack()
-        self.frameTextWidth.place(relx=0.57, rely=0.41, anchor="n")
+        # 3. Altura (Col 3, Row 1)
+        self.entryHeight = LabeledEntry(self.view_manual, "Altura", entry_width=15)
+        self.entryHeight.place(relx=self.col3_x, rely=self.row1_y, anchor="center")
 
-        # Altura
-        self.labelHeight = tk.Label(self.view_manual, text="Altura", bg="blue", fg="white", font=("Arial", 16))
-        self.labelHeight.pack()
-        self.labelHeight.place(relx=0.8, rely=0.4, anchor="n")
+        # 4. Profundidad (Col 1, Row 2)
+        # Note: LabeledEntry anchor="center" centers the whole (Label+Entry) block.
+        self.entryDepth = LabeledEntry(self.view_manual, "Profundidad", entry_width=15)
+        self.entryDepth.place(relx=self.col1_x, rely=self.row2_y, anchor="center")
 
-        self.frameTextHeight = tk.Entry(self.view_manual, width=20)
-        self.frameTextHeight.pack()
-        self.frameTextHeight.place(relx=0.9, rely=0.41, anchor="n")
+        # 5. Ventanas/Techo (Conditional) (Col 2, Row 2)
+        self.entryRoofType = LabeledEntry(self.view_manual, "Ventanas\npor piso", entry_width=15)
+        # Position will be managed dynamically
 
-        # Profundidad
-        self.labelDepth = tk.Label(self.view_manual, text="Profundidad", bg="blue", fg="white", font=("Arial", 16))
-        self.labelDepth.pack()
-        self.labelDepth.place(relx=0.08, rely=0.5, anchor="n")
-
-        self.frameTextDepth = tk.Entry(self.view_manual, width=20)
-        self.frameTextDepth.pack()
-        self.frameTextDepth.place(relx=0.22, rely=0.51, anchor="n")
-
-        # Tipo de techo (solo para algunos tipos de edificios)
-        self.labelRoof = tk.Label(self.view_manual, text="Ventanas\npor piso", bg="blue", fg="white", font=("Arial", 16))
-        self.labelRoof.pack()
-        self.labelRoof.place(relx=0.43, rely=0.5, anchor="n")
-
-        self.frameTextRoofType = tk.Entry(self.view_manual, width=20)
-        self.frameTextRoofType.pack()
-        self.frameTextRoofType.place(relx=0.57, rely=0.51, anchor="n")
-
-        # Número de pisos (solo para algunos tipos de edificios)
-        self.labelFloors = tk.Label(self.view_manual, text="Pisos", bg="blue", fg="white", font=("Arial", 16))
-        self.labelFloors.pack()
-        self.labelFloors.place(relx=0.8, rely=0.5, anchor="n")
-
-        self.frameTextLevelValue = tk.Entry(self.view_manual, width=20)
-        self.frameTextLevelValue.pack()
-        self.frameTextLevelValue.place(relx=0.9, rely=0.51, anchor="n")
-
-        # Llamada a la función de actualización para ocultar/mostrar campos
+        # 6. Pisos/Modulos (Conditional) (Col 3, Row 2)
+        self.entryFloors = LabeledEntry(self.view_manual, "Pisos", entry_width=15)
+        # Position will be managed dynamically
+        
+        # Trigger update
         self.update_fields_based_on_building_type(self.building_type_var.get())
 
     def update_fields_based_on_building_type(self, building_type):
         """Actualiza los campos dependiendo del tipo de edificio seleccionado."""
-        # Por defecto ocultamos todo
-        self.labelRoof.place_forget()
-        self.frameTextRoofType.place_forget()
-        self.labelFloors.place_forget()
-        self.frameTextLevelValue.place_forget()
-
-        # Mostramos campos basados en el tipo de edificio
+        
+        # Hide dynamic fields
+        self.entryRoofType.place_forget()
+        self.entryFloors.place_forget()
+        
         if building_type == "residencial" or building_type == "comercial":
-            # Si es residencial o comercial, mostramos campos de número de pisos y tipo de techo
-            self.labelRoof.place(relx=0.43, rely=0.5, anchor="n")
-            self.frameTextRoofType.place(relx=0.57, rely=0.51, anchor="n")
-            self.labelFloors.config(text="Pisos")  # Aseguramos que vuelva a mostrar "Pisos"
-            self.labelFloors.place(relx=0.8, rely=0.5, anchor="n")
-            self.frameTextLevelValue.place(relx=0.9, rely=0.51, anchor="n")
-        elif building_type == "industrial":
-            # Si es industrial, mostrar diferentes campos
-            self.labelFloors.config(text="Módulos")  # Cambiar "Pisos" a "Módulos"
-            self.labelFloors.place(relx=0.4, rely=0.5, anchor="n")  # Ajustamos la posición a la izquierda
-            self.frameTextLevelValue.place(relx=0.57, rely=0.51, anchor="n")  # Ajustamos la posición a la izquierda
-            # No mostramos el campo de "Tipo de techo"
-            self.labelRoof.place_forget()
-            self.frameTextRoofType.place_forget()
+            # Show Roof/Windows in Col 2
+            self.entryRoofType.label.config(text="Ventanas\npor piso")
+            self.entryRoofType.place(relx=self.col2_x, rely=self.row2_y, anchor="center")
+            
+            # Show Floors in Col 3
+            self.entryFloors.label.config(text="Pisos")
+            self.entryFloors.place(relx=self.col3_x, rely=self.row2_y, anchor="center")
 
-        # Aseguramos que la interfaz se actualice correctamente después de modificar la visibilidad
-        self.master.update_idletasks()  # Actualiza tareas de la interfaz
-        self.master.update()  # Procesa los eventos pendientes
+        elif building_type == "industrial":
+            # Industrial has NO Roof/Window input, only Modules (Floors)
+            # We can put Modules in Col 2 or Col 3. 
+            # Let's put it in Col 2 for balance since Col 3 is far right? 
+            # Or Col 3 to keep "Floors/Modules" concept in same column.
+            # Let's stick to Col 3 for semantic consistency (Height/Verticality).
+            
+            self.entryFloors.label.config(text="Módulos")
+            self.entryFloors.place(relx=self.col2_x, rely=self.row2_y, anchor="center") 
+            # Actually, user View had it shifting left. I'll put it in Col 2 so we have Input-Input-Empty behavior?
+            # No, Col 2 is better center.
+
+        self.master.update_idletasks()
+        self.master.update()
 
     def create_file_listbox(self):
-        self.file_listbox = tk.Listbox(self.view_manual, font=("Arial", 13), width=50, height=7, relief="sunken", borderwidth=5)
-        self.file_listbox.pack()
-        self.file_listbox.bind('<Double-1>', self.event_buttons.download_file)
-        self.file_listbox.place(relx=0.5, rely=0.75, anchor="center")
+        # Pass self as handler (BaseView has necessary methods)
+        self.file_listbox_component = FileListBox(self.view_manual, self, width=80, height=8) # Increased size slightly
+        self.file_listbox_component.place(relx=0.5, rely=0.75, anchor="center")
+        self.file_listbox = self.file_listbox_component.listbox
         self.update_file_listbox()
 
     def create_buttons(self):
-        # Botón para regresar a la vista principal
-        self.back_button = tk.Button(self.view_manual, text="Volver", command=self.show_main_view, font=("Arial", 10, "bold"), relief="raised", borderwidth=5, width=10)
-        self.back_button.pack(side="bottom", pady=10)
-        self.back_button.place(relx=0.4, rely=0.99, anchor="s")
+        self.footer = Footer(self.view_manual, text_info="Vista para cargar datos manualmente")
+        self.footer.pack(side="bottom", fill="x")
 
-        # Botón para eliminar archivo
-        self.delete_button = tk.Button(self.view_manual, text="Eliminar", command=self.event_buttons.delete_file, font=("Arial", 10, "bold"), relief="raised", borderwidth=5)
-        self.delete_button.pack(side="bottom", pady=10)
-        self.delete_button.place(relx=0.5, rely=0.99, anchor="s")
-
-        # Botón para enviar la información
-        self.submit_button = tk.Button(self.view_manual, text="Submit", command=self.submit_data, font=("Arial", 10, "bold"), relief="raised", borderwidth=5, width=10)
-        self.submit_button.pack(side="bottom", pady=10)
-        self.submit_button.place(relx=0.6, rely=0.99, anchor="s")
-
-    def update_file_listbox(self):
-        self.event_buttons.update_file_listbox()
+        self.submit_button = self.footer.add_button(text="Submit", command=self.submit_data, side="right", padx=30)
+        self.delete_button = self.footer.add_button(text="Eliminar", command=self.delete_file, side="right", padx=10)
+        self.back_button = self.footer.add_button(text="Volver", command=self.show_main_view, side="left", padx=30)
 
     def validate_fields(self):
-        # Validación de campos
         building_type = self.building_type_var.get()
-        widthValue = self.frameTextWidth.get()
-        heightValue = self.frameTextHeight.get()
-        depthValue = self.frameTextDepth.get()
-        floorsValue = self.frameTextLevelValue.get()
+        widthValue = self.entryWidth.get()
+        heightValue = self.entryHeight.get()
+        depthValue = self.entryDepth.get()
+        floorsValue = self.entryFloors.get()
+        roofValue = self.entryRoofType.get()
 
         if building_type == "Elija una opción":
             messagebox.showerror("Error", "Por favor, seleccione un tipo de edificio.")
@@ -185,46 +137,34 @@ class ManualView(tk.Frame):
         if not widthValue or not heightValue or not depthValue:
             messagebox.showerror("Error", "Por favor, complete todos los campos de ancho, altura y profundidad.")
             return False
-        if building_type != "industrial" and (not floorsValue or not self.frameTextRoofType.get()):
+        if building_type != "industrial" and (not floorsValue or not roofValue):
             messagebox.showerror("Error", "Por favor, complete los campos de pisos y tipo de techo.")
             return False
         return True
 
     def submit_data(self):
-        # Validar antes de proceder
         if not self.validate_fields():
             return
 
-        # Si todos los campos son válidos, se procede
         building_type = self.building_type_var.get()
-        widthValue = self.frameTextWidth.get()
-        heightValue = self.frameTextHeight.get()
-        depthValue = self.frameTextDepth.get()
-        floorsValue = self.frameTextLevelValue.get()
-        roof_type = self.frameTextRoofType.get() if building_type != "industrial" else ""  # Si es industrial, no tomamos techo
+        widthValue = self.entryWidth.get()
+        heightValue = self.entryHeight.get()
+        depthValue = self.entryDepth.get()
+        floorsValue = self.entryFloors.get()
+        roof_type = self.entryRoofType.get() if building_type != "industrial" else ""
 
-        print(f"Información guardada: building_type: {building_type}, width: {widthValue}, height: {heightValue}, depth: {depthValue}, roof: {roof_type}, floors: {floorsValue}")
+        print(f"Información guardada: type: {building_type}, w: {widthValue}, h: {heightValue}, d: {depthValue}, r: {roof_type}, f: {floorsValue}")
 
         try:
-            # Llamada a la generación de la regla procedural
             reglaProcedural = GenerarCGA.GenerarProceduralManual(building_type, widthValue, heightValue, depthValue, roof_type, floorsValue)
-            generated_file_path = self.event_buttons.get_next_filename()
-            os.makedirs("generated_files", exist_ok=True)
+            generated_file_path = self.get_next_filename()
+            os.makedirs(self.get_generated_files_dir(), exist_ok=True)
 
-            # Guardar la regla generada en un archivo
             with open(generated_file_path, "w") as file:
                 file.write(reglaProcedural)
                 print("El archivo regla procedural ha sido creado exitosamente")
 
-            self.event_buttons.generated_files.append(os.path.abspath(generated_file_path))
-            self.update_file_listbox()
-
-            # Guardar lista de archivos generados
-            self.event_buttons.save_generated_files()
+            self.add_generated_file(generated_file_path)
 
         except Exception as e:
             print(f"Error al crear el archivo: {e}")
-
-    def show_main_view(self):
-        self.pack_forget()
-        self.master.show_main_view()

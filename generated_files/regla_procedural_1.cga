@@ -1,0 +1,224 @@
+version "2020.0"
+
+attr wall_texture = "assets/textureChapGreca.jpg"
+attr door_obj = "assets/industrialDoor.obj"
+
+attr height =  12
+attr width = scope.sx
+attr depth = scope.sz
+attr modulos =  5
+attr frontModules = 5
+attr sizeWind = depth/modulos - 1
+attr sizeFrontModule = width/frontModules +1
+
+
+
+
+Structure-->
+	extrude(height)
+
+	ShipBuilding
+	
+ShipBuilding-->
+	comp(f){ front: FrontFacade
+			|left: LeftFacade
+			|right: RightFacade
+			|back: BackFacade
+			|top: RoofShip}
+			
+
+	
+FrontFacade-->
+	split(x){ {depth * 0.3: beamFrontFacade
+			| depth * 0.4 : WallFrontFacade}
+			|depth * 0.3:  beamFrontFacade}
+			
+beamFrontFacade-->
+			split(y){height * 0.8: downWallFront
+					|height * 0.2: upWallFront}
+					
+					
+downWallFront-->
+	WallTexture					
+	
+upWallFront-->
+			split(x){(depth * 0.3) * 0.3: leftColumnWindow
+					|(depth * 0.3) * 0.4: windowFront
+					|(depth * 0.3) * 0.3: rightColumnWindow}
+	
+windowFront-->	
+	Window
+	
+leftColumnWindow-->
+	WallTexture	
+
+rightColumnWindow-->
+	WallTexture
+	
+RightFacade-->
+	split(x){ {1: beamsRightFacade(split.index)
+			 |sizeWind : WallRightFacade(split.index)}*
+			 | ~1: LastBeam}
+	
+
+			 
+LeftFacade-->	
+	split(x){ {1: beamsLeftFacade(split.index)
+			 |~sizeWind : WallLeftFacade(split.index)}*
+			 | 1: LastBeam}
+			 
+BackFacade-->
+	split(x){ {1: beamsFrontFacade
+			| ~sizeFrontModule : WallBackFacade(split.index)}*
+			|1:  LastBeam}
+			
+
+
+//ROOF RULES
+RoofShip-->	
+	roofGable(5)
+	split(z){ {1: beamsRoof
+			 |~14 : RoofTiles}*
+			 | 1: LastBeamRoof}
+
+RoofTiles-->
+	RoofTexture
+	
+beamsRoof-->
+	RoofTexture
+	
+LastBeamRoof-->
+	RoofTexture	
+
+
+WallBackFacade(backIndex)-->
+	case backIndex == 0:
+				WallTexture
+		
+		
+	else :
+		split(y){0.5:FloorFrontFacade
+				|height-2: WallFront(split.index)
+				|1: WindowFront}
+			 
+//FRONT RULES						 
+WallFrontFacade-->
+			split(x){(depth*0.3) * 0.3: columnLeftDoor
+					|(depth*0.4) * 0.4: Door
+					|(depth*0.3) * 0.3: columnRightDoor }	
+	
+columnLeftDoor-->
+	WallTexture		
+
+columnRightDoor-->
+	WallTexture
+	
+				
+doorLevel-->
+	Door
+	
+restLevel-->
+	WallTexture
+				
+WallFront(WallFrontIndex)-->
+	case WallFrontIndex == 1:
+		WallTexture
+	
+	else:
+		WallTexture
+
+FloorFrontFacade-->
+	WallTexture
+	
+beamsFrontFacade-->
+	WallTexture
+			
+//LEFT RULES
+WallLeftFacade(wallLeftIndex)-->
+	case wallLeftIndex == 0:
+		split(y){10:windowSides}
+		
+	else :
+		split(y){0.5:FloorLeftFacade
+				|height-2: WallLeft
+				|1: WindowSidesLeft}
+				
+WallLeft-->
+	WallTexture	
+	
+FloorLeftFacade-->
+	WallTexture
+
+beamsLeftFacade(beamLeftIndex)-->
+	case beamLeftIndex == 0 :
+		WallTexture
+	else:
+		WallTexture
+		
+//RIGHT RULES					
+WallRightFacade(wallRightIndex)-->
+	case wallRightIndex == 0:
+		split(y){10:WindowSidesRight}
+		
+	else :
+		split(y){0.5:FloorRightFacade
+				|height-2: WallRight
+				|1: WindowSidesRight}
+
+WallRight-->
+	WallTexture	
+	
+FloorRightFacade-->
+	WallTexture
+		
+beamsRightFacade(beamRightIndex)-->
+	case beamRightIndex == 0 :
+		WallTexture
+	else:
+		WallTexture
+
+LastBeam-->
+	WallTexture
+		
+//TEXTURE WALLS RULE		
+WallTexture -->
+	setupProjection(0, scope.xz, 5, 5)
+  	texture(wall_texture)
+  	projectUV(0)
+  	
+//TEXTURE ROOF RULE  	
+ RoofTexture -->
+	setupProjection(0, scope.zx, 20, 20)
+  	texture(wall_texture)
+  	projectUV(0)
+
+
+ Door-->
+    i(door_obj)
+    s((depth*0.4) * 0.4 , height, 0.5)  // Escala la ventana al tamaño deseado
+    r(0, 0, 0)
+    t(0, 0, -0.5)
+    
+Window -->
+    i("window.obj")
+    s(0, height * 0.2, (depth * 0.3) * 0.4)  // Escala la ventana al tamaño deseado
+    r(0, -90, 0)
+    t(0, 0, -9.15)
+    
+WindowFront-->
+    i("window.obj")
+    s(1, 1.5, sizeFrontModule)  // Escala la ventana al tamaño deseado
+    r(0, -90, 0)
+    t(-1, 0, -sizeFrontModule)
+    
+ WindowSidesRight -->
+    i("window.obj")
+    s(1, 1.5, sizeWind+1)  // Escala la ventana al tamaño deseado
+    r(0, -90, 0)
+    t(-1, 0, -sizeWind)       
+    
+WindowSidesLeft -->
+    i("window.obj")
+    s(1, 1.5, sizeWind)  // Escala la ventana al tamaño deseado
+    r(0, -90, 0)
+    t(-1, 0, -sizeWind)

@@ -1,0 +1,206 @@
+version "2020.0"
+
+attr wall_texture = "assets/texture2.jpg"
+window_texture = "assets/windowWall.jpg"
+balcony_texture = "assets/windowTwo.jpg"
+attr window_obj = "assets/ventanaObj5.obj"
+white_texture = "assets/whitetexture.jpg"
+Roof_texture = "assets/tejas.jpg"
+attr balcony_obj = "assets/BALCON.fb"
+attr middle_texture = "assets/blanco.jpg"
+
+
+    attr pisos = 3
+    attr height = 60
+    attr width = scope.sx
+    attr depth = scope.sz
+    attr roof = "no"
+    attr floor = 1
+    attr topledge = 1
+    attr floors = 1
+    attr widthWall = (width/floors) 
+    attr heightwall = (height/pisos) - 1
+
+
+
+    Structure -->
+        extrude(height)  
+        building
+
+    building-->
+        comp(f){ front: FrontFacade
+                | left : LeftSide 
+                | right: RigthSide
+                | back: BackSide
+                | top: Roof }
+        
+LeftSide-->	
+	PinturaParedes
+	
+RigthSide-->
+	PinturaParedes
+	
+BackSide-->
+	PinturaParedes
+
+        
+    FrontFacade-->
+        split(y) { {floor : Floor(split.index) 
+                | ~heightwall : FloorWall(split.index)}*
+                | ~topledge: TopLedge(split.index)}
+        
+    TopLedge(topindex) -->
+
+        case topindex == 0:
+            extrude(0)
+        else:
+            extrude(0)
+        
+        PinturaParedes
+        
+    Floor(floorindex)-->
+        split(x){ {0.5: BottomColumn(split.index)
+                |~widthWall -1: Balcony(split.index)}*
+                | 0.5 :final	}
+
+final -->
+	PinturaParedes
+				
+	last-->
+		extrude(0)
+				
+    BottomColumn(bottomcolumnindex)-->
+        case bottomcolumnindex == 0:
+            extrude(0)
+        PinturaParedes
+        case bottomcolumnindex == 2:
+            extrude(0)
+            MiddleBalcony
+        case bottomcolumnindex == 3:
+            extrude(0)
+            
+        else:
+            MiddleBalcony
+        
+        PinturaParedes			
+        
+    Balcony(balconyindex)-->
+        case balconyindex == 0:
+            extrude(0)
+            PinturaParedes
+            
+            
+            
+            
+        else:
+            MiddleBalcony
+            balconyObj
+        
+        
+    FloorWall(floorwallindex)-->
+        split(x) { {~0.5:sideColumn(split.index)
+                |widthWall -1 :WallColumn(split.index) }*
+                |~0.5: final}
+                
+                
+ 	sideColumn(columnIndex)-->
+ 		case columnIndex == 0:
+ 			extrude(0)
+ 			PinturaParedes
+ 		else:
+ 			extrude(0)
+ 			PinturaParedes
+        
+    WallColumn(wallcolumnindex)-->
+        case wallcolumnindex == 0:
+			extrude(0)
+
+        else:
+            extrude(1)
+            WindowBalcony
+
+
+    SideCenterFloor(sidecenter)-->
+        extrude(0)
+        PinturaParedes
+
+    SideLeftFloor(sideleftfloor)-->
+
+        split(y){~1.5 : top(split.index)
+                | 1.5 : middle(split.index)
+                |~1.5 : bottom(split.index)}
+        PinturaParedes
+        
+    SideRightFloor(sideleftfloor)-->
+        split(y){~1.5 : top(split.index)
+                | 1.5 : middle(split.index)
+                |~1.5 : bottom(split.index)}
+		
+    top(topside)-->
+        extrude(0)
+        PinturaParedes
+
+    middle(middleside)-->
+        Window
+        
+        
+    bottom(topside)-->
+        extrude(0)
+        PinturaParedes
+        
+
+        
+    PinturaParedes-->
+        setupProjection(0, scope.xy, 6 , 6)
+        texture(wall_texture)
+        projectUV(0)
+        
+    
+    WindowTexture-->
+        setupProjection(0, scope.xz, 5, 5)
+        texture(window_texture)
+        projectUV(0)
+        rotateUV(0, 180)
+        
+    TexturaBalcony-->
+        setupProjection(0, scope.xz, 5, 5)
+        texture(balcony_texture)
+        projectUV(0)
+        rotateUV(0, 180)	
+    
+    PinturaBlanca-->
+        setupProjection(0, scope.xy, 5, 5)
+        texture(white_texture)
+        projectUV(0)
+        rotateUV(0, 180)
+        
+	TextureRoof-->
+		setupProjection(0, scope.xz, 10, 10)
+        texture(Roof_texture)
+        projectUV(0)
+        rotateUV(0, 180)
+    
+    Window -->
+        i(window_obj)
+        s(widthWall/2 -1  , 1.5, 0.7)  // Escala la ventana al tama o deseado
+        t(0,0,0)
+        PinturaBlanca
+        
+    WindowBalcony -->
+        i(window_obj)
+        s('1, 'heightwall, 1)  // Escala la ventana al tama o deseado
+        t(0,-1,heightwall)
+        r(270, 0, 0)
+        PinturaBlanca
+        
+    balconyObj -->
+        i(balcony_obj)
+        s('1, 3, '1)  // Escala la ventana al tama o deseado
+        t(0 , 1,0)
+        r(0, 0, 0)
+        
+    MiddleBalcony-->
+        setupProjection(0, scope.xz, 5, 5)
+        texture(middle_texture)
+        projectUV(0)
+        rotateUV(0, 180)
