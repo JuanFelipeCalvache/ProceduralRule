@@ -55,7 +55,7 @@ To run the project from **Visual Studio Code**, follow these steps:
 ```
 ProceduralRuleCreator/
 ├── models/
-│   └── best.pt                # YOLOv5 trained model
+│   └── best.pt                # YOLOv8 trained model
 ├── src/
 │   ├── main.py                # Main application entry point
 │   ├── gui/
@@ -76,7 +76,7 @@ ProceduralRuleCreator/
 1. **Select Input Method:** Choose between *Manual*, *CSV*, or *Image Capture* mode.  
 2. **Provide Input Data:** Enter data manually, upload a CSV file, or select an image of a building.  
 3. **Process Data:**  
-   - For images, the YOLOv5 model detects architectural elements.  
+   - For images, the YOLOv8 model detects architectural elements.  
    - For CSV/manual modes, the system parses user data directly.  
 4. **Generate CGA File:** The app automatically creates a `.cga` file containing procedural modeling rules.  
 5. **Export and Use in CityEngine.**
