@@ -11,10 +11,10 @@ It takes user-defined inputs and converts them into procedural rules for 3D mode
   The application offers **three main views** to generate CGA files from different data sources:
   1. **Manual Input:** Users can directly define architectural parameters and attributes manually.  
   2. **CSV Import:** Automatically generate CGA rules by importing data from structured CSV files.  
-  3. **Image Capture:** Uses an AI model trained with **YOLOv5** to detect architectural features such as **doors**, **windows**, and **balconies** from images and converts them into procedural CGA rules.
+  3. **Image Capture:** Uses an AI model trained with **YOLOv8** to detect architectural features such as **doors**, **windows**, and **balconies** from images and converts them into procedural CGA rules.
 
 - **AI-Powered Detection:**  
-  The image capture module leverages a **custom YOLOv5 model** trained for object detection of building elements, enabling semi-automatic rule creation based on visual input.
+  The image capture module leverages a **custom YOLOv8 model** trained for object detection of building elements, enabling semi-automatic rule creation based on visual input.
 
 - **Seamless CGA Generation:**  
   Converts input data—whether from manual, CSV, or AI detection—into syntactically correct **.cga** files, ready for use in **CityEngine**.
@@ -42,7 +42,7 @@ To run the project from **Visual Studio Code**, follow these steps:
 ## 🧠 Technologies Used
 
 - **Python 3**
-- **YOLOv5** (for object detection)
+- **YOLOv8** (for object detection)
 - **Tkinter** (for GUI development)
 - **OpenCV** (for image processing)
 - **Pandas** (for CSV data handling)
